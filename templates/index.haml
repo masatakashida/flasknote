@@ -1,4 +1,7 @@
 %html
 	%body
-		%h1
-			Hello, {{username}}
+		%ul.entries
+			-for entry in entries:
+				%li
+					{{ entry.title | safe }}
+					{ entry.body | safe }
