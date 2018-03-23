@@ -1,8 +1,8 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, g
 from hamlish_jinja import HamlishExtension
 from werkzeug import ImmutableDict
 import os
-import sqlite3
+from flask_sqlalchemy import SQLAlchemy
 
 class FlaskWithHamlish(Flask):
 	jinja_options = ImmutableDict(
@@ -10,9 +10,19 @@ class FlaskWithHamlish(Flask):
 	)
 app = FlaskWithHamlish(__name__)
 
+db_uri = "sqlite:///" + os.path.join(app.root_path, 'flasknote.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
+db = SQLAlchemy(app)
+
+class Entry(db.Model):
+    __tablename__ = "entries"
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(), nullable=False)
+    body = db.Column(db.String(), nullable=False)
+
 @app.route('/')
 def hello_world():
-	entries = get_db().execute('select title, body from entries').fetchall()
+	entries = Entry.query.all()
 	return render_template('index.haml', entries=entries)
 
 # Database
